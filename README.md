@@ -1,4 +1,6 @@
 # CI/CD with AWS Greengrass
+This code repository is used with the **CI/CD with AWS Greengrass** workshop which can be found by following this link [https://greengrass-cicd.workshop.aws](https://greengrass-cicd.workshop.aws)
+
 When provisioning application code to devices running **AWS Greengrass** there is two different events that trigger the provisioning of the code. The first trigger is the release of a new version of the application code, this triggers the CI/CD flow of build, test and deploy. The second trigger is when a new device has been produced. The factory flow usually has a workflow where the produced IoT box gets registered and paired with its host hardware (Vehicle, Machine or whatever appliance). Once the register and pairing flow is completed the latest version of the correct application is deployed.
 
 In this workshop we explore both these two ways of triggering the deployment of a device running **AWS Greengrass**. 
