@@ -1,0 +1,29 @@
+version: '0.2'
+phases:
+  install:
+    commands:
+    - make clean init
+    - apt-get install zip
+  build:
+    commands:
+    - ls -la
+    - make deploy-greengrass-canary
+    - make run-test
+    - make deploy-prod-alias CDK_DEFAULT_REGION=$AWS_DEFAULT_REGION
+    - PROD_SOURCE_BUCKET=$(aws ssm get-parameter --name "/iot-gg-cicd-workshop/s3/prod_source_bucket" --with-decryption --query 'Parameter.Value' --output text)
+    - PROD_DEPLOY_PARAM_BUCKET=$(aws ssm get-parameter --name "/iot-gg-cicd-workshop/s3/prod_deploy_param_bucket" --with-decryption --query 'Parameter.Value' --output text)
+    - zip -r prod_deploy.zip . -x "node_modules/*" -x "venv/*" -x "deploy_params.json"
+    - aws s3 mv prod_deploy.zip s3://$PROD_SOURCE_BUCKET
+    - rm deploy_params.json gg_group_config.json
+    - make prepare-greengrass-prod
+    - zip deploy_params.zip deploy_params.json
+    - aws s3 mv deploy_params.zip s3://$PROD_DEPLOY_PARAM_BUCKET
+artifacts:
+  base-directory: .
+  files: "**/*"
+environment:
+  buildImage:
+    type: LINUX_CONTAINER
+    defaultComputeType: BUILD_GENERAL1_SMALL
+    imageId: aws/codebuild/standard:2.0
+    imagePullPrincipalType: CODEBUILD

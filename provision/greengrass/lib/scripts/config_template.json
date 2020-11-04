@@ -1,0 +1,28 @@
+{
+    "coreThing" : {
+        "caPath" : "root.ca.pem",
+        "certPath" : "<certificateId>.pem",
+        "keyPath" : "<certificateId>.key",
+        "thingArn" : "arn:aws:iot:<region>:<accountId>:thing/<thingname>",
+        "iotHost" : "<iotEndpoint>",
+        "ggHost" : "greengrass-ats.iot.<region>.amazonaws.com"
+    },
+    "runtime" : {
+        "cgroup" : {
+        "useSystemd" : "yes"
+        }
+    },
+    "managedRespawn" : false,
+    "crypto" : {
+        "principals" : {
+            "SecretsManager" : {
+                "privateKeyPath" : "file:///greengrass/certs/<certificateId>.key"
+            },
+            "IoTCertificate" : {
+                "privateKeyPath" : "file:///greengrass/certs/<certificateId>.key",
+                "certificatePath" : "file:///greengrass/certs/<certificateId>.pem"
+            }
+        },
+        "caPath" : "file:///greengrass/certs/root.ca.pem"
+    }
+}

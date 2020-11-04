@@ -1,0 +1,17 @@
+version: '0.2'
+phases:
+  install:
+    commands:
+    - make init CDK_DEFAULT_REGION=$AWS_DEFAULT_REGION
+  build:
+    commands:
+    - make deploy-function CDK_DEFAULT_REGION=$AWS_DEFAULT_REGION
+artifacts:
+  base-directory: .
+  files: "**/*"
+environment:
+  buildImage:
+    type: LINUX_CONTAINER
+    defaultComputeType: BUILD_GENERAL1_SMALL
+    imageId: aws/codebuild/standard:2.0
+    imagePullPrincipalType: CODEBUILD

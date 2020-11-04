@@ -1,0 +1,43 @@
+yum -y install python3-pip jq
+pip3 install 'greengrasssdk==1.5.0'
+adduser --system ggc_user
+groupadd --system ggc_group
+
+# https://docs.aws.amazon.com/greengrass/latest/developerguide/what-is-gg.html#gg-core-download-tab
+curl -O https://d1onfpft10uf5o.cloudfront.net/greengrass-core/downloads/1.10.2/greengrass-linux-x86-64-1.10.2.tar.gz
+tar xf greengrass-linux-x86*.gz -C /
+
+ACCOUNT=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .accountId)
+REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+
+aws s3 cp s3://<s3_bucket> . --recursive
+
+python3 -m venv venv
+source venv/bin/activate
+pip install boto3
+python register_greengrass_client.py --thingpolicy <thing_policy> --grouprole <group_role_arn> --fleet <fleet> --region $REGION --account $ACCOUNT 
+
+cd /greengrass/certs/
+curl -o root.ca.pem https://www.amazontrust.com/repository/AmazonRootCA1.pem
+cd /tmp
+
+cat <<EOT > greengrass.service
+[Unit]
+Description=greengrass daemon
+After=network.target
+
+[Service]
+ExecStart=/greengrass/ggc/core/greengrassd start
+Type=simple
+RestartSec=2
+Restart=always
+User=root
+PIDFile=/var/run/greengrassd.pid
+
+[Install]
+WantedBy=multi-user.target
+EOT
+cp greengrass.service /etc/systemd/system
+systemctl enable greengrass.service
+reboot
+
